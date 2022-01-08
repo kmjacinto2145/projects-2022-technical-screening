@@ -1,11 +1,5 @@
-# projects-2022-technical-screening
-Easy and Hard technical screening for 2022 projects applications
+# Projects 2022 Technical Screening - Michael Jacinto
 
-Application form: https://docs.google.com/forms/d/e/1FAIpQLSc0RFu0mFL_BIoOhdi3yr7qyxu6h32882_i3x2qHKOtablTgQ/viewform
+Hey, thanks for taking the time to check and review my code for the technical screening. I've completed both the easy and hard challenges (but I've yet to check my solution to the hard problem with more advanced tests!). The hard problem was a fun challenge and ultimately it was quite straightforward once I understood all the patterns and found a way to convert the conditions to a boolean expression.
 
-1. Clone this repo
-2. Follow instructions on application and inside files
-3. Upload to your own repo (please call it projects-2022-technical-screening) <-- MAKE SURE IT ISN'T SET TO PRIVATE
-4. Provide link to repo in application
-
-Good luck!
+Hopefully looking forward to working with CSESoc Projects in 2022!
