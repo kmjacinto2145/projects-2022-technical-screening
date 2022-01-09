@@ -26,21 +26,6 @@ with open("./conditions.json") as f:
     f.close()
 
 
-def check_comp_uoc_level(course_list, level, uoc_required):
-    """
-    Checks whether a student has completed a certain number of UOC
-    of COMP courses for a given level
-    """
-    uoc_completed = 0
-    for course in courses_list:
-        if int(course[4]) == level:
-            uoc_completed += 6
-
-    if uoc_completed >= uoc_required:
-        return True
-    else:
-        return False
-
 def process_condition(condition):
 
     """
@@ -80,6 +65,71 @@ def process_condition(condition):
     #Miscellaneous mistakes
     condition = condition.replace("oc", "of")
     condition = condition.replace("Completion of", "").replace("completion of", "")
+    condition = condition.replace(":", "")
+
+    return condition
+
+
+
+def check_uoc_selection(condition):
+    """
+    Checks condition for "x units of credit in (<courses>)"
+    """
+    if " units of credit in (" in condition:
+        condition_split = condition.split(" units of credit in ")
+        uoc = condition_split[0].split()[-1]
+        courses_to_check = condition_split[1][condition_split[1].find("(") + 1 : condition_split[1].find(")")]
+        courses_to_check_list = courses_to_check.split(", ")
+        courses_to_check_list = [bool(strtobool(bool_val)) for bool_val in courses_to_check_list]
+
+        #Replaces the string in question with a boolean
+        string_to_replace = uoc + " units of credit in (" + courses_to_check + ")"
+        if 6 * sum(courses_to_check_list) >= int(uoc):
+            condition = condition.replace(string_to_replace, "True")
+        else:
+            condition = condition.replace(string_to_replace, "False")
+
+    return condition
+
+def check_comp_uoc_level(courses_list, condition):
+    """
+    Checks whether a student has completed a certain number of UOC
+    of COMP courses for a given level
+    """
+    if " units of credit in level " in condition:
+        condition_split = condition.split(" units of credit in level ")
+        uoc_required = condition_split[0].split()[-1]
+        level = condition_split[1].split()[0]
+
+        string_to_replace = uoc_required + " units of credit in level " + level + " COMP courses"
+
+        uoc_completed = 0
+        for course in courses_list:
+            if int(course[4]) == int(level):
+                uoc_completed += 6
+
+        if uoc_completed >= int(uoc_required):
+            condition = condition.replace(string_to_replace, "True")
+        else:
+            condition = condition.replace(string_to_replace, "False")
+
+    return condition
+
+def check_uoc(courses_list, condition):
+
+    """
+    Checks whether a student has completed a certain number of UOC
+    """
+
+    if " units of credit" in condition:
+        condition_split = condition.split(" units of credit")
+        uoc = condition_split[0].split()[-1]
+        string_to_replace = uoc + " units of credit"
+
+        if 6 * len(courses_list) >= int(uoc):
+            condition = condition.replace(string_to_replace, "True")
+        else:
+            condition = condition.replace(string_to_replace, "False")
 
     return condition
 
@@ -101,6 +151,7 @@ def evaluate_condition(condition, courses_list):
     for i,word in enumerate(condition):
         if len(word) == 8:
             if word[4:8].isnumeric():
+                #Replaces course code with either True or False
                 if word in courses_list:
                     condition[i] = "True"
                 else:
@@ -109,48 +160,18 @@ def evaluate_condition(condition, courses_list):
     condition = ''.join([item for item in condition])
 
     #Check for "x units of credit in (<courses>)"
-    if " units of credit in (" in condition:
-        condition_split = condition.split(" units of credit in ")
-        uoc = condition_split[0].split()[-1]
-        courses_to_check = condition_split[1][condition_split[1].find("(") + 1 : condition_split[1].find(")")]
-        courses_to_check_list = courses_to_check.split(", ")
-        courses_to_check_list = [bool(strtobool(bool_val)) for bool_val in courses_to_check_list]
-
-        #Replaces the string in question with a boolean
-        string_to_replace = uoc + " units of credit in (" + courses_to_check + ")"
-        if 6 * sum(courses_to_check_list) >= int(uoc):
-            condition = condition.replace(string_to_replace, "True")
-        else:
-            condition = condition.replace(string_to_replace, "False")
+    condition = check_uoc_selection(condition)
 
     #Check for "x units of credit in level y COMP courses"
-    if " units of credit in level " in condition:
-        condition_split = condition.split(" units of credit in level ")
-        uoc = condition_split[0].split()[-1]
-        level = condition_split[1].split()[0]
-
-        string_to_replace = uoc + " units of credit in level " + level + "COMP courses"
-        if check_comp_uoc_level(courses_list, level, uoc):
-            condition = condition.replace(string_to_replace, "True")
-        else:
-            condition = condition.replace(string_to_replace, "False")
+    condition = check_comp_uoc_level(courses_list, condition)
 
     #Check for "x units of credit" - note that this is done last
     #to prevent the code from changing the text when one of the previous
     #two cases are found
-    if " units of credit" in condition:
-        condition_split = condition.split(" units of credit")
-        uoc = condition_split[0].split()[-1]
-        string_to_replace = uoc + " units of credit"
-
-        if 6 * len(courses_list) >= int(uoc):
-            condition = condition.replace(string_to_replace, "True")
-        else:
-            condition = condition.replace(string_to_replace, "False")
+    condition = check_uoc(courses_list, condition)
 
     #Evaluates an expression of booleans to give an overall boolean value
     return eval(condition)
-
 
 
 def is_unlocked(courses_list, target_course):
