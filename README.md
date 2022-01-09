@@ -4,4 +4,6 @@ Hey, thanks for taking the time to check and review my code for the technical sc
 
 Please note that I worked on the original versions of the two challenges, prior to any edits (e.g. the COMP6443 typo in conditions.json). I will update this README to let you know if I've made any changes to my code.
 
+UPDATE 9/1/22: Edited hard.py code in light of new tests added by CSESoc to test_hard.py.
+
 Hopefully looking forward to working with CSESoc Projects in 2022!
